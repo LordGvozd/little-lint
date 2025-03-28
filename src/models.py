@@ -47,8 +47,6 @@ class RelativeImports(Violation):
             " as they are usually more readable and tend to be better behaved (or at least give better error messages)"
             " if the import system is incorrectly configured (such as when a directory inside a package ends up on sys.path)")
 
-
-
 class ModuleNotFound(Violation):
     type = ViolationType.ERROR
     text = "Module not found!"
