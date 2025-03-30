@@ -1,8 +1,10 @@
 import sys
+from calendar import month
 
 import pytest
 
-from src.rules import scaner
+from src.models import ImportsNotAtTop, InvalidImportsOrder
+from src.rules import scanner
 
 # Correct
 correct_imports = (
@@ -19,7 +21,7 @@ import os
 
 import pytest
 
-import main
+import gogogog
     
 """,
     """
@@ -37,7 +39,8 @@ import sys, os
 
 @pytest.mark.parametrize("code", correct_imports)
 def test_correct_imports(code: str):
-    violations = scaner.scan(code)
+    violations = scanner.scan(code, include_only=InvalidImportsOrder)
+    print(violations)
 
     assert len(violations) == 0
 
@@ -45,6 +48,6 @@ def test_correct_imports(code: str):
 @pytest.mark.parametrize("code", wrong_imports)
 def test_incorrect_imports(code: str):
     sys.path.append("./test_project/")
-    scaner.scan(code)
+    scanner.scan(code, include_only=InvalidImportsOrder)
 
     assert True

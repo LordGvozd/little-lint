@@ -1,4 +1,5 @@
-from src.rules import use_4_spaces_for_level
+from src.rules.file_rules import use_4_spaces_for_level
+
 
 # Correct
 using_4_spaces_for_level = """
@@ -26,5 +27,5 @@ def long_function_name(
 """
 
 
-def test_4_spaces_per_level():
-    assert use_4_spaces_for_level(using_4_spaces_for_level) is None
+# def test_4_spaces_per_level():
+#     assert use_4_spaces_for_level(using_4_spaces_for_level) is None

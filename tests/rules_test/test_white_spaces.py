@@ -1,5 +1,5 @@
 from src.models import LineBreakAfterBinOp
-from src.rules import break_line_after_bin_op
+from src.rules.line_rules import break_line_after_bin_op
 
 # Correct
 break_before_bin_op = """

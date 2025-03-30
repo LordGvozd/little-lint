@@ -6,7 +6,7 @@ from pathlib import Path
 from colorama import Fore, init
 
 from src.models import ViolationType
-from src.rules import scaner
+from src.rules import scanner
 
 colors = {
     ViolationType.WARNING: Fore.YELLOW,
@@ -39,7 +39,7 @@ def _check_file(file_path: Path) -> tuple[list[str], int]:
     else:
         if file_path.suffix == ".py":
             with open(file_path, "r") as f:
-                violations = scaner.scan(f.read())
+                violations = scanner.scan(f.read())
 
             for v in violations:
                 color = colors[v.type]
