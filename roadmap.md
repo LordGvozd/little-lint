@@ -6,7 +6,7 @@ This describes, what should be implemented
 
 ### Code Lay-out
 
-- [ ] Use 4 spaces for indentation level
+- [X] Use 4 spaces for indentation level
 - [X] Space instead of tabs
 - [X] Maximum line length
 - [X] Line break must be after binary operation

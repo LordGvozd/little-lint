@@ -1,8 +1,10 @@
 import re
+from re import fullmatch
 
 from src import constants
 from src.models import *
 from src.rules.rules_container import RulesContainer
+from src.types import FileRule
 
 file_rules = RulesContainer()
 
@@ -54,18 +56,61 @@ def get_leading_spaces_count(source: str) -> int:
     return count
 
 
-# @file_rules.rule
-def use_4_spaces_for_level(code: str) -> Violation | None:
+@file_rules.rule
+def use_4_spaces_for_level(code: str) -> list[Violation] | None | Violation:
     """Checks, is every line if file use 4 spaces
     per indentation level
     """
+    violations = []
+    # ToDo: exclude docstrings and comments
     code = code.replace("\t", "    ")
 
     previous_tabs_count = 0
-    for number, line in enumerate(code.split("\n")):
-        leading_spaces_count = get_leading_spaces_count(line)
-        if leading_spaces_count % 4 != 0:
-            return Not4SpaceForIndentationLevel(number)
+    open_bracket_count = 0
+    open_bracket_level = []
+    open_docstring = False
 
-        if leading_spaces_count - previous_tabs_count > 4:
-            return Not4SpaceForIndentationLevel(number)
+    for number, line in enumerate(code.split("\n")):
+        number += 1
+
+        leading_spaces_count = get_leading_spaces_count(line)
+        if open_bracket_count > 0:
+            if not line:
+                pass
+            elif re.findall(r"^\s*\).*", line):
+                pass
+            elif open_bracket_level[-1] + 4 == leading_spaces_count:
+                pass
+            else:
+                print(line)
+                violations.append(Not4SpaceForIndentationLevel(number))
+
+        count_before = open_bracket_count
+
+        open_string = False
+
+        if line.count("'''") == 1 or line.count('"""') == 1:
+            open_docstring = not open_string
+
+        for cn, c in enumerate(line):
+            if c in ("'", '"'):
+                open_string = not open_string
+
+            if open_string or open_docstring:
+                continue
+            if c == "(":
+                open_bracket_count += 1
+                open_bracket_level.append(leading_spaces_count)
+            if c == ")":
+                open_bracket_count -= 1
+                print(line)
+                del open_bracket_level[-1]
+        if count_before < open_bracket_count:
+            if not re.findall(r"\(\s*$", line):
+                violations.append(Not4SpaceForIndentationLevel(number))
+        if count_before > open_bracket_count:
+            print(line)
+            if not re.fullmatch(r"^\s*\).*", line):
+                violations.append(Not4SpaceForIndentationLevel(number))
+
+    return violations

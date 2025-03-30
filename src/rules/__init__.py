@@ -3,6 +3,8 @@ from src.rules.ast_rules import ast_rules
 from src.rules.file_rules import file_rules
 from src.rules.line_rules import line_rules
 
+
+
 scanner = Scaner()
 
 for rule in file_rules.get_all_rules():
