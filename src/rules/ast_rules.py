@@ -89,7 +89,7 @@ def right_order(node: ast.Module) -> list[Violation]:
 
 
 @ast_rules.rule(ast.Import)
-def import_on_one_line(node: ast.Import) -> Violation:
+def import_on_one_line(node: ast.Import) -> Violation | None:
     if len(node.names) > 1:
         return ManyImportOnOneLine(node.lineno)
 
