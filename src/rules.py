@@ -1,5 +1,6 @@
 import ast
 import importlib.util
+import re
 import sys
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from src.core import Scaner
 from src.models import *
 
 scaner = Scaner()
+
 
 @scaner.file_rule
 def check_max_line_length(code: str) -> list[Violation]:
@@ -25,6 +27,7 @@ def check_max_line_length(code: str) -> list[Violation]:
 
     return result
 
+
 @scaner.file_rule
 def check_tabs(code: str) -> list[Violation]:
     result: list[Violation] = []
@@ -35,6 +38,49 @@ def check_tabs(code: str) -> list[Violation]:
         if l.startswith("\t"):
             result.append(UsingTabsToTabulation(number + 1))
     return result
+
+
+@scaner.file_rule
+def blank_line_at_end(code: str) -> Violation | None:
+    last_line = code.split("\n")[-1]
+    if re.findall(r"\S", last_line):
+        return NoBlankLineAtEnd(len(code.split("\n")))
+
+
+def get_leading_spaces_count(source: str) -> int:
+    count = 0
+    for char in source:
+        if char == " ":
+            count += 1
+        else:
+            break
+    return count
+
+
+# @scaner.file_rule
+def use_4_spaces_for_level(code: str) -> Violation | None:
+    """Checks, is every line if file use 4 spaces
+    per indentation level
+    """
+    code = code.replace("\t", "    ")
+
+    previous_tabs_count = 0
+    for number, line in enumerate(code.split("\n")):
+        leading_spaces_count = get_leading_spaces_count(line)
+        if leading_spaces_count % 4 != 0:
+            return Not4SpaceForIndentationLevel(number)
+
+        if leading_spaces_count - previous_tabs_count > 4:
+            return Not4SpaceForIndentationLevel(number)
+
+
+# Line rules
+
+
+@scaner.line_rule
+def break_line_after_bin_op(line: str, number: int) -> Violation | None:
+    if re.match(r"\w+\s*\+\s*$", line):
+        return LineBreakAfterBinOp(number)
 
 
 @scaner.ast_rule
@@ -50,6 +96,7 @@ class ImportType(Enum):
     STDLIB = 2
     THIRD_PARTY = 3
     PROJECT = 4
+
 
 def get_import_type(imp: ast.Import | ast.ImportFrom) -> ImportType:
     if isinstance(imp, ast.Import):
@@ -67,19 +114,25 @@ def get_import_type(imp: ast.Import | ast.ImportFrom) -> ImportType:
     if import_name in stdlib_names:
         return ImportType.STDLIB
 
-    spec = importlib.util.find_spec(import_name)
+    try:
+        spec = importlib.util.find_spec(import_name)
+    except:
+        spec = None
 
     if spec:
         module_path = Path(spec.origin).resolve()
 
-        if "site-packages" in str(module_path) or "dist-packages" in str(module_path):
+        if "site-packages" in str(module_path) or "dist-packages" in str(
+            module_path
+        ):
             return ImportType.THIRD_PARTY
 
         else:
-            if str(module_path.parent) in sys.path:
-                return ImportType.PROJECT
+            return ImportType.PROJECT
+
     else:
         return ImportType.NOT_FOUND
+
 
 @scaner.ast_rule(ast.Module)
 def right_order(node: ast.Module) -> list[Violation]:
@@ -90,7 +143,6 @@ def right_order(node: ast.Module) -> list[Violation]:
     for n in node.body:
         if isinstance(n, (ast.Import, ast.ImportFrom)):
             all_imports.append(n)
-
 
     all_imports = sorted(all_imports, key=lambda i: i.lineno)
 
@@ -109,15 +161,16 @@ def right_order(node: ast.Module) -> list[Violation]:
     return imports_violation
 
 
-
-
 @scaner.ast_rule(ast.Import)
 def import_on_one_line(node: ast.Import) -> Violation:
     if len(node.names) > 1:
         return ManyImportOnOneLine(node.lineno)
 
+
 @scaner.ast_rule(ast.Import, ast.ImportFrom)
-def import_not_at_top_of_file(node: ast.Import | ast.ImportFrom) -> Violation | None:
+def import_not_at_top_of_file(
+    node: ast.Import | ast.ImportFrom,
+) -> Violation | None:
     # Get root
     root = node
     while hasattr(root, "parent"):
@@ -130,6 +183,7 @@ def import_not_at_top_of_file(node: ast.Import | ast.ImportFrom) -> Violation | 
         if not isinstance(n, (ast.Import, ast.ImportFrom)):
             if n.lineno < import_lineno:
                 return ImportsNotAtTop(import_lineno)
+
 
 @scaner.ast_rule(ast.ImportFrom)
 def relative_import_from(node: ast.ImportFrom) -> Violation | None:
