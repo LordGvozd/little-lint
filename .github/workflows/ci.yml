@@ -31,4 +31,4 @@ jobs:
         uv sync --frozen
     - name: Test with pytest
       run: |
-        pytest
+        uv run pytest
