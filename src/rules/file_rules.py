@@ -1,6 +1,9 @@
 import re
 from re import fullmatch
 
+import io
+import tokenize
+
 from src import constants
 from src.models import *
 from src.rules.rules_container import RulesContainer
@@ -114,3 +117,12 @@ def use_4_spaces_for_level(code: str) -> list[Violation] | None | Violation:
                 violations.append(Not4SpaceForIndentationLevel(number))
 
     return violations
+
+
+@file_rules.rule
+def comments_must_start_with_space(code: str) -> Violation | None:
+    code_io = io.BytesIO(code.encode("utf-8"))
+
+    for token in tokenize.tokenize(code_io.readline):
+        if token.type == tokenize.COMMENT and re.match(r"^#\w", token.string):
+            return CommentsMustStartWithSpace(token.start[0])

@@ -89,3 +89,14 @@ class NoBlankLineAtEnd(Violation):
 class Not4SpaceForIndentationLevel(Violation):
     type = ViolationType.ERROR
     text = "Use 4 spaces per indentation level."
+
+
+class CommentsMustStartWithSpace(Violation):
+    type = ViolationType.WARNING
+    text = """Comments must start with space character.
+    Correct:
+    # Example comment
+    
+    Incorrect:
+    #Example comment
+    """
