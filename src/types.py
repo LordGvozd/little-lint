@@ -1,4 +1,5 @@
 import ast
+from dataclasses import dataclass
 from typing import TypeAlias, Callable
 
 from src.models import Violation
@@ -6,6 +7,15 @@ from src.models import Violation
 FileRule: TypeAlias = Callable[[str], list[Violation] | None]
 LineRule: TypeAlias = Callable[[str], Violation | None]
 AstRule: TypeAlias = Callable[[ast.AST], list[Violation] | None]
+
+
+@dataclass
+class AstChecker:
+    rule: AstRule
+
+    ignore_comments: bool = False
+
+
 AnyAstType: TypeAlias = (
     type[ast.AST]
     | type[ast.mod]
