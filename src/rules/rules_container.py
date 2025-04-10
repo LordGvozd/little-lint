@@ -31,26 +31,20 @@ class RulesContainer:
     ) -> None:
         self._rules.append(Rule(checker, args, kwargs))
 
-    @overload
-    def rule(self, func: Callable) -> Any:
-        pass
-
-    @overload
-    def rule(self, *rule_args, **rule_kwargs) -> Any:
-        pass
-
     def rule(self, *rule_args, **rule_kwargs):
         # If decorator without args or kwargs
-        if isinstance(rule_args[0], FunctionType):
+        if len(rule_args) == 1 and isinstance(rule_args[0], FunctionType):
 
             self._add_rule(rule_args[0], None, None)
 
+            @functools.wraps(rule_args[0])
             def wrapper(*args, **kwargs):
                 return rule_args[0](*args, **kwargs)
 
             return wrapper
         else:
             # If decorator takes some args or kwargs
+
             def actual_decorator(func: AstRule | FileRule | LineRule):
                 self._add_rule(func, rule_args, rule_kwargs)
 

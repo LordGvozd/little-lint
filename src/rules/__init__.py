@@ -4,15 +4,15 @@ from src.rules.file_rules import file_rules
 from src.rules.line_rules import line_rules
 
 
-
 scanner = Scaner()
 
 for rule in file_rules.get_all_rules():
-    scanner.add_file_rule(rule.checker)
+    scanner.add_file_rule(rule)
 
 for rule in line_rules.get_all_rules():
-    scanner.add_line_rule(rule.checker)
+    scanner.add_line_rule(rule)
 
 for rule in ast_rules.get_all_rules():
     for ast_type in rule.args:
-        scanner.add_ast_rule(ast_type, rule.checker)
+
+        scanner.add_ast_rule(ast_type, rule)

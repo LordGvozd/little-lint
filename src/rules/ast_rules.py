@@ -4,11 +4,12 @@ import sys
 from enum import Enum, unique
 from pathlib import Path
 
+from src import constants
 from src.models import *
 from src.rules.rules_container import RulesContainer
+from src.utils import ast_utils
 
 ast_rules = RulesContainer()
-
 # @ast_rules.rule
 # def whitespaces_in_expr_in_stmt(code: str) -> list[Violation]:
 #     pass
@@ -116,3 +117,52 @@ def import_not_at_top_of_file(
 def relative_import_from(node: ast.ImportFrom) -> Violation | None:
     if node.level > 0:
         return RelativeImports(node.lineno)
+
+
+@ast_rules.rule(ast.Module, ignore_comments_and_decorators=True)
+def top_level_must_be_surrounded(
+    module: ast.FunctionDef, source: str
+) -> list[Violation] | None:
+
+    violations = []
+
+    nodes_must_be_surrounded: list[int] = []
+    for index, child in enumerate(ast.iter_child_nodes(module)):
+        if isinstance(child, (ast.FunctionDef, ast.ClassDef)):
+            nodes_must_be_surrounded.append(index)
+
+    for node_index in nodes_must_be_surrounded:
+        node = module.body[node_index]
+        # If node at top
+        if node_index == 0:
+
+            continue
+
+        # If node at middle
+        if (
+            node.lineno
+            - ast_utils.get_block_end_lineno(module.body[node_index - 1])
+            != constants.TOP_LEVEL_DEFS_TAB + 1
+        ):
+            violations.append(
+                TopLevelFuncAndClassDefNotSurrounded(node.lineno)
+            )
+            continue
+
+        # If node at end
+        if node_index == len(module.body) - 1:
+            continue
+
+        node_end_lineno = ast_utils.get_block_end_lineno(node)
+        next_node_lineno = module.body[node_index + 1].lineno
+
+        if (
+            module.body[node_index + 1] not in nodes_must_be_surrounded
+            and next_node_lineno - node_end_lineno
+            != constants.TOP_LEVEL_DEFS_TAB + 1
+        ):
+            violations.append(
+                TopLevelFuncAndClassDefNotSurrounded(next_node_lineno)
+            )
+
+    return violations

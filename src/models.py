@@ -89,3 +89,11 @@ class NoBlankLineAtEnd(Violation):
 class Not4SpaceForIndentationLevel(Violation):
     type = ViolationType.ERROR
     text = "Use 4 spaces per indentation level."
+
+
+class TopLevelFuncAndClassDefNotSurrounded(Violation):
+    type = ViolationType.WARNING
+    text = (
+        "Surround top-level function"
+        " and class definitions with two blank lines."
+    )
