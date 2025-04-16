@@ -10,7 +10,7 @@ This describes, what should be implemented
 - [X] Space instead of tabs
 - [X] Maximum line length
 - [X] Line break must be after binary operation
-- [ ] Top-level functions and class definition should be surrounded with two blank lines
+- [X] Top-level functions and class definition should be surrounded with two blank lines
 - [ ] Method definitions inside a class are surrounded by a single blank line
 - [ ] Code in the core Python distribution should always use UTF-8, and should not have an encoding declaratio
 - [X] Imports must be on separate lines
@@ -66,5 +66,15 @@ This describes, what should be implemented
 - [ ] There should be no space before the colon
 - [ ] If an assignment has a right hand side, then the equality sign should have exactly one space on both sides
 
+## Little-lint
+- [ ] Forbid using `print()` use `logging` or `loguru` instead
+- [ ] Forbid call function in top level (exclude assigns), use `if __name__ == "__main__"`
 
+### Typing
+ - [ ] Forbid using `Any` in annotations
+ - [ ] Use only typed functions
+
+### Standard library
+- [ ] Forbid using f-strings in `logging`
+- 
 

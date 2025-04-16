@@ -1,4 +1,6 @@
 import re
+import tokenize
+from io import BytesIO
 from re import fullmatch
 
 import io
@@ -85,7 +87,6 @@ def use_4_spaces_for_level(code: str) -> list[Violation] | None | Violation:
             elif open_bracket_level[-1] + 4 == leading_spaces_count:
                 pass
             else:
-                print(line)
                 violations.append(Not4SpaceForIndentationLevel(number))
 
         count_before = open_bracket_count
@@ -106,17 +107,16 @@ def use_4_spaces_for_level(code: str) -> list[Violation] | None | Violation:
                 open_bracket_level.append(leading_spaces_count)
             if c == ")":
                 open_bracket_count -= 1
-                print(line)
                 del open_bracket_level[-1]
         if count_before < open_bracket_count:
             if not re.findall(r"\(\s*$", line):
                 violations.append(Not4SpaceForIndentationLevel(number))
         if count_before > open_bracket_count:
-            print(line)
             if not re.fullmatch(r"^\s*\).*", line):
                 violations.append(Not4SpaceForIndentationLevel(number))
 
     return violations
+
 
 
 @file_rules.rule
@@ -126,3 +126,21 @@ def comments_must_start_with_space(code: str) -> Violation | None:
     for token in tokenize.tokenize(code_io.readline):
         if token.type == tokenize.COMMENT and re.match(r"^#\w", token.string):
             return CommentsMustStartWithSpace(token.start[0])
+
+# @file_rules.rule
+def top_level_must_be_surrounded(code: str) -> list[Violation] | None:
+    code_buffer = BytesIO(code.encode())
+
+    must_be_surrounded = []
+
+    indent_level = 0
+
+    for token in tokenize.tokenize(code_buffer.readline):
+        if token.type == tokenize.INDENT:
+            indent_level += 1
+        if token.type == tokenize.DEDENT:
+            indent_level -= 1
+
+        if token.type == tokenize.NAME:
+            if token.string in ("class", "def"):
+                pass

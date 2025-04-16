@@ -100,3 +100,10 @@ class CommentsMustStartWithSpace(Violation):
     Incorrect:
     #Example comment"""
    
+  
+class TopLevelFuncAndClassDefNotSurrounded(Violation):
+    type = ViolationType.WARNING
+    text = (
+        "Surround top-level function"
+        " and class definitions with two blank lines."
+    )

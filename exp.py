@@ -1,11 +1,8 @@
-def long_function_name(
-    var_one,
-    var_two,
-    var_three,
-    var_four,
-    v5,
-    v7,
-    b7,
-    jjtujjrt,
-):
+import ast
+
+code = """
+def main():
     pass
+"""
+
+print(ast.parse(code).body[0].__dict__)
