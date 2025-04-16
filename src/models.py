@@ -98,5 +98,5 @@ class CommentsMustStartWithSpace(Violation):
     # Example comment
     
     Incorrect:
-    #Example comment
+    #Example comment"""
     """
