@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "astunparse>=1.6.3",
     "colorama>=0.4.6",
+    "pytest>=8.3.5",
 ]
 
 [dependency-groups]
